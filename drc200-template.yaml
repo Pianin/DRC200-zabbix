@@ -1,0 +1,899 @@
+zabbix_export:
+  version: '6.0'
+  date: '2024-10-12T16:11:53Z'
+  groups:
+    - uuid: b56506d6f54a453a90a82e58fbf49870
+      name: Digiton
+  templates:
+    - uuid: 91af58a396fe433abbd39c22884fbcd5
+      template: DRC200-API
+      name: DRC200-API
+      templates:
+        - name: 'ICMP Ping'
+      groups:
+        - name: Digiton
+      items:
+        - uuid: c5139eef3c8840cbad124131bdd53d93
+          name: 'Serial number'
+          type: DEPENDENT
+          key: drc.serial
+          delay: '0'
+          trends: '0'
+          value_type: TEXT
+          inventory_link: SERIALNO_A
+          preprocessing:
+            - type: JSONPATH
+              parameters:
+                - $.data..Hardware.Serial
+            - type: STR_REPLACE
+              parameters:
+                - '['
+                - ''
+            - type: STR_REPLACE
+              parameters:
+                - ']'
+                - ''
+            - type: STR_REPLACE
+              parameters:
+                - '"'
+                - ''
+          master_item:
+            key: raw.system.status
+          tags:
+            - tag: drc
+              value: serial
+        - uuid: 0337a3d2212d4900a3b4e6ffe0223e91
+          name: 'CPU Temperature'
+          type: DEPENDENT
+          key: hardware.cpu.temperature
+          delay: '0'
+          history: 30d
+          units: °C
+          preprocessing:
+            - type: JSONPATH
+              parameters:
+                - $.data..Hardware.CPU_temp
+            - type: STR_REPLACE
+              parameters:
+                - '['
+                - ''
+            - type: STR_REPLACE
+              parameters:
+                - ']'
+                - ''
+            - type: STR_REPLACE
+              parameters:
+                - '"'
+                - ''
+          master_item:
+            key: raw.system.status
+          tags:
+            - tag: component
+              value: cpu
+            - tag: component
+              value: health
+          triggers:
+            - uuid: cf10b95f90d04e6a995fc5fca26bf520
+              expression: 'avg(/DRC200-API/hardware.cpu.temperature,5m)>{$TEMP_CRIT_CPU}'
+              name: 'CPU: Temperature is above critical threshold'
+              event_name: 'CPU: Temperature is above critical threshold: >{$TEMP_CRIT_CPU}'
+              opdata: 'Current value: {ITEM.LASTVALUE1}'
+              priority: HIGH
+              description: 'This trigger uses temperature sensor values as well as temperature sensor status if available'
+            - uuid: b3c9b379135347128240844de737ca51
+              expression: 'avg(/DRC200-API/hardware.cpu.temperature,5m)>{$TEMP_WARN_CPU}'
+              name: 'CPU: Temperature is above warning threshold'
+              priority: WARNING
+            - uuid: 0c1c6d2ac97d46bd987afe1c941d55ff
+              expression: 'avg(/DRC200-API/hardware.cpu.temperature,5m)<{$TEMP_CRIT_LOW_CPU}'
+              name: 'CPU: Temperature is too low'
+              event_name: 'CPU: Temperature is too low: <{$TEMP_CRIT_LOW_CPU}'
+              opdata: 'Current value: {ITEM.LASTVALUE1}'
+              priority: AVERAGE
+        - uuid: cadec2f0653b42099000220f81cab599
+          name: 'CPU Usage %'
+          type: DEPENDENT
+          key: hardware.cpu.usage
+          delay: '0'
+          history: 30d
+          units: '%'
+          preprocessing:
+            - type: JSONPATH
+              parameters:
+                - $.data..Hardware.CPU_usage
+            - type: STR_REPLACE
+              parameters:
+                - '['
+                - ''
+            - type: STR_REPLACE
+              parameters:
+                - ']'
+                - ''
+            - type: STR_REPLACE
+              parameters:
+                - '"'
+                - ''
+          master_item:
+            key: raw.system.status
+          tags:
+            - tag: component
+              value: cpu
+            - tag: component
+              value: health
+          triggers:
+            - uuid: 986e3233906e452bb9d1db0846baaafd
+              expression: 'min(/DRC200-API/hardware.cpu.usage,5m)>{$CPU.UTIL.CRIT}'
+              name: 'CPU high utlization'
+              event_name: 'High CPU utilization (over {$CPU.UTIL.CRIT}% for 5m)'
+              opdata: 'Current utilization: {ITEM.LASTVALUE1}'
+              priority: WARNING
+              description: 'CPU utilization is too high. The system might be slow to respond.'
+              tags:
+                - tag: scope
+                  value: performance
+        - uuid: 823fc8bc81354ac89cf02eb8163c37c3
+          name: 'Disk usage %'
+          type: DEPENDENT
+          key: hardware.ddisk_usage
+          delay: '0'
+          history: 30d
+          value_type: FLOAT
+          units: '%'
+          preprocessing:
+            - type: JSONPATH
+              parameters:
+                - $.data..Hardware.Disk_usage
+            - type: STR_REPLACE
+              parameters:
+                - '['
+                - ''
+            - type: STR_REPLACE
+              parameters:
+                - ']'
+                - ''
+          master_item:
+            key: raw.system.status
+          tags:
+            - tag: component
+              value: hdd
+            - tag: component
+              value: health
+        - uuid: 3ab7a65b288e4d4aa2d4b349f73cb5e4
+          name: 'System disk usage %'
+          type: DEPENDENT
+          key: hardware.system_disk_usage
+          delay: '0'
+          history: 30d
+          value_type: FLOAT
+          units: '%'
+          preprocessing:
+            - type: JSONPATH
+              parameters:
+                - $.data..Hardware.System_disk_usage
+            - type: STR_REPLACE
+              parameters:
+                - '['
+                - ''
+            - type: STR_REPLACE
+              parameters:
+                - ']'
+                - ''
+          master_item:
+            key: raw.system.status
+          tags:
+            - tag: component
+              value: hdd
+            - tag: component
+              value: health
+        - uuid: e17b905ea8cf40e0a01204760766f134
+          name: 'Left level'
+          type: DEPENDENT
+          key: levels.left
+          delay: '0'
+          history: 30d
+          value_type: FLOAT
+          units: dB
+          description: 'Состояние выхода по левому каналу выражено в dB'
+          preprocessing:
+            - type: JSONPATH
+              parameters:
+                - '$.data.levels.[0].left'
+          master_item:
+            key: raw.loudness.levels
+          tags:
+            - tag: LEVEL
+              value: Left
+        - uuid: 09756d194bd640feb8977681dca29934
+          name: 'Integration level'
+          type: DEPENDENT
+          key: levels.LUFS
+          delay: '0'
+          history: 30d
+          value_type: FLOAT
+          units: LUFS
+          description: 'Состояние выхода по интегральной громкости  выражено в LUFS'
+          preprocessing:
+            - type: JSONPATH
+              parameters:
+                - '$.data.levels.[0].loudness'
+          master_item:
+            key: raw.loudness.levels
+          tags:
+            - tag: LEVEL
+              value: Integration
+          triggers:
+            - uuid: e6d9750fe8554e9d80596d65f3d7503d
+              expression: 'avg(/DRC200-API/levels.LUFS,5m)<={$LOW.LEVEL}'
+              recovery_mode: RECOVERY_EXPRESSION
+              recovery_expression: 'avg(/DRC200-API/levels.LUFS,5m)>={$LOW.LEVEL}'
+              name: 'OUTPUT Value on {HOST.NAME} is SILENCE'
+              priority: DISASTER
+        - uuid: 8098e69e91c34640b8551a5b78a06ca5
+          name: 'Right level'
+          type: DEPENDENT
+          key: levels.right
+          delay: '0'
+          history: 30d
+          value_type: FLOAT
+          units: dB
+          description: 'Состояние выхода по правому каналу выражено в dB'
+          preprocessing:
+            - type: JSONPATH
+              parameters:
+                - '$.data.levels.[0].right'
+          master_item:
+            key: raw.loudness.levels
+          tags:
+            - tag: LEVEL
+              value: Right
+        - uuid: 4a088228172d4f26ac18715bdf7ca614
+          name: 'MP3 status'
+          type: DEPENDENT
+          key: mp3.status
+          delay: '0'
+          history: 30d
+          trends: '0'
+          value_type: TEXT
+          description: 'Статус работы MP3 локального источника'
+          preprocessing:
+            - type: JSONPATH
+              parameters:
+                - '$.data.lines[1].status'
+          master_item:
+            key: raw.inputs.status
+          tags:
+            - tag: STATUS
+              value: MP3
+          triggers:
+            - uuid: a6160a59e25e446383cd98d690aade6e
+              expression: 'last(/DRC200-API/mp3.status)<>"signal"'
+              recovery_mode: RECOVERY_EXPRESSION
+              recovery_expression: 'last(/DRC200-API/mp3.status)="signal"'
+              name: 'MP3 status is NOT active'
+              priority: INFO
+        - uuid: efe9e339b3f94ad49f2f8930e91f0b65
+          name: 'Playlist active'
+          type: DEPENDENT
+          key: playlist.active
+          delay: '0'
+          history: 30d
+          trends: '0'
+          value_type: TEXT
+          description: 'Статус активности плейлиста. Проигрывается или нет.'
+          preprocessing:
+            - type: JSONPATH
+              parameters:
+                - $.data.playlist_active
+          master_item:
+            key: raw.inputs.status
+          tags:
+            - tag: STATUS
+              value: playlist
+          triggers:
+            - uuid: 8fbf218422d54157ae6cfdb0d1f5ac55
+              expression: 'last(/DRC200-API/playlist.active)="false"'
+              recovery_mode: RECOVERY_EXPRESSION
+              recovery_expression: 'last(/DRC200-API/playlist.active)="true"'
+              name: 'Playlist is NOT active'
+              priority: WARNING
+              description: 'Проверка на работу плеера с использованием плейлиста'
+        - uuid: 2ccf1b93b81047e1bcd0331ad0c8b5d6
+          name: 'Today playlist status'
+          type: DEPENDENT
+          key: playlist.today.status
+          delay: '0'
+          history: 30d
+          trends: '0'
+          value_type: TEXT
+          preprocessing:
+            - type: JSONPATH
+              parameters:
+                - $.data.today
+          master_item:
+            key: raw.playlist
+          tags:
+            - tag: Playlist
+              value: status
+          triggers:
+            - uuid: c611c19e511a4068b490bb58d549d515
+              expression: 'last(/DRC200-API/playlist.today.status,#3)="No file"'
+              recovery_mode: RECOVERY_EXPRESSION
+              recovery_expression: 'last(/DRC200-API/playlist.today.status)="Ok"'
+              name: 'Today playlist status is "No file"'
+              priority: WARNING
+              description: 'На текущий плейлист не скачены все медиа-файлы'
+              manual_close: 'YES'
+            - uuid: 93a563aeb3de4769957a9c506eb5c0e6
+              expression: 'last(/DRC200-API/playlist.today.status,#3)="No playlist"'
+              recovery_mode: RECOVERY_EXPRESSION
+              recovery_expression: 'last(/DRC200-API/playlist.today.status)="Ok"'
+              name: 'Today playlist status is "No playlist"'
+              priority: AVERAGE
+              description: 'На сегодня не получен файл плейлиста!'
+              manual_close: 'YES'
+        - uuid: ace0cf6c4a98443eb522c7c43c7d63dc
+          name: 'Tomorrow playlist status'
+          type: DEPENDENT
+          key: playlist.tommorow.status
+          delay: '0'
+          history: 30d
+          trends: '0'
+          value_type: TEXT
+          preprocessing:
+            - type: JSONPATH
+              parameters:
+                - $.data.tomorrow
+          master_item:
+            key: raw.playlist
+          tags:
+            - tag: Playlist
+              value: status
+          triggers:
+            - uuid: 2ffe11f9f31d449bb51bf2d3d5f01a2f
+              expression: 'last(/DRC200-API/playlist.tommorow.status,#12)="No file"'
+              recovery_mode: RECOVERY_EXPRESSION
+              recovery_expression: 'last(/DRC200-API/playlist.tommorow.status)="Ok"'
+              name: 'Tomorrow playlist status is "No file"'
+              priority: WARNING
+              description: 'Для завтрашнего плейлиста не получены все медиа-файлы для плейлиста.'
+              manual_close: 'YES'
+            - uuid: e5d8a5738e0b45a6ac63d97e1c5cb991
+              expression: 'last(/DRC200-API/playlist.tommorow.status,#12)="No playlist"'
+              recovery_mode: RECOVERY_EXPRESSION
+              recovery_expression: 'last(/DRC200-API/playlist.tommorow.status)="Ok"'
+              name: 'Tomorrow playlist status is "No playlist"'
+              priority: WARNING
+              description: 'Не получен завтрашний плейлист'
+              manual_close: 'YES'
+        - uuid: 662c52e497ac4f0d92d73091dd158cbb
+          name: 'Raw Get info'
+          type: HTTP_AGENT
+          key: raw.info
+          history: '0'
+          trends: '0'
+          status: DISABLED
+          value_type: TEXT
+          url: 'https://{HOST.IP}/api/'
+          posts: '{"command": "get_info", "token": "{$DRC200TOKEN}"}'
+          post_type: JSON
+          request_method: POST
+          tags:
+            - tag: RAW
+        - uuid: c6aca1d74ce44818946d46cf8b756079
+          name: 'Raw Get Inputs list'
+          type: HTTP_AGENT
+          key: raw.inputs.list
+          delay: 30s
+          history: '0'
+          trends: '0'
+          value_type: TEXT
+          url: 'https://{HOST.IP}/api/'
+          posts: '{"command": "get_inputs_list", "token": "{$DRC200TOKEN}"}'
+          post_type: JSON
+          request_method: POST
+          tags:
+            - tag: RAW
+        - uuid: c3ca3b3ac6334b23906539a9542b3648
+          name: 'Raw Get Inputs status'
+          type: HTTP_AGENT
+          key: raw.inputs.status
+          delay: 15s
+          history: '0'
+          trends: '0'
+          value_type: TEXT
+          url: 'https://{HOST.IP}/api/'
+          posts: '{"command": "get_inputs_status", "token": "{$DRC200TOKEN}"}'
+          post_type: JSON
+          request_method: POST
+          tags:
+            - tag: RAW
+        - uuid: f6ee1384bde243b7a876d9e96ae649e5
+          name: 'Raw Get Loudness levels'
+          type: HTTP_AGENT
+          key: raw.loudness.levels
+          delay: 30s
+          history: '0'
+          trends: '0'
+          value_type: TEXT
+          url: 'https://{HOST.IP}/api/'
+          posts: '{"command": "get_levels", "token": "{$DRC200TOKEN}"}'
+          post_type: JSON
+          request_method: POST
+          tags:
+            - tag: RAW
+        - uuid: f1e27a3627944503a9293fda303c2eba
+          name: 'Raw Get Playlist status'
+          type: HTTP_AGENT
+          key: raw.playlist
+          delay: 10m
+          history: '0'
+          trends: '0'
+          value_type: TEXT
+          url: 'https://{HOST.IP}/api/'
+          posts: '{"command": "get_playlist_readiness", "token": "{$DRC200TOKEN}"}'
+          post_type: JSON
+          request_method: POST
+          tags:
+            - tag: RAW
+          triggers:
+            - uuid: e3b09227714c43c6a6c21766325b1117
+              expression: 'nodata(/DRC200-API/raw.playlist,3)=1'
+              name: 'Raw Get Playlist status NO DATA'
+              priority: WARNING
+        - uuid: a01ec3dc8428423d99456319bb3a31c5
+          name: 'Raw Get RDS settings'
+          type: HTTP_AGENT
+          key: raw.rds.settings
+          history: '0'
+          trends: '0'
+          status: DISABLED
+          value_type: TEXT
+          url: 'https://{HOST.IP}/api/'
+          posts: '{"command": "get_rds_settings", "token": "{$DRC200TOKEN}"}'
+          post_type: JSON
+          request_method: POST
+          tags:
+            - tag: RAW
+        - uuid: f4d535ee8c3c44bebb0590bbb8eab040
+          name: 'Raw Get Recordes status'
+          type: HTTP_AGENT
+          key: raw.recorders
+          delay: 10m
+          history: '0'
+          trends: '0'
+          value_type: TEXT
+          url: 'https://{HOST.IP}/api/'
+          posts: '{"command": "get_recorders", "token": "{$DRC200TOKEN}"}'
+          post_type: JSON
+          request_method: POST
+          tags:
+            - tag: RAW
+        - uuid: 61766083b47543ee9edd85f8acb95907
+          name: 'Raw Get System status'
+          type: HTTP_AGENT
+          key: raw.system.status
+          history: '0'
+          trends: '0'
+          value_type: TEXT
+          preprocessing:
+            - type: JAVASCRIPT
+              parameters:
+                - 'return value.replace (/\\n/gi, ''\n'')'
+            - type: JAVASCRIPT
+              parameters:
+                - 'return value.replace (/\\/gi, '''')'
+            - type: STR_REPLACE
+              parameters:
+                - '"{'
+                - '{'
+            - type: STR_REPLACE
+              parameters:
+                - '}"'
+                - '}'
+          url: 'https://{HOST.IP}/api/'
+          posts: '{"command": "cmd_console", "token": "{$DRC200TOKEN}", "data": ["system_status"]}'
+          post_type: JSON
+          request_method: POST
+          tags:
+            - tag: RAW
+              value: system
+        - uuid: 3e32116c544945059d6652c8d7965ced
+          name: 'Recorder bitrate output'
+          type: DEPENDENT
+          key: recorder.bitrate.output
+          delay: '0'
+          history: 30d
+          value_type: FLOAT
+          units: b
+          preprocessing:
+            - type: JSONPATH
+              parameters:
+                - '$.data.[0].bitrate'
+            - type: STR_REPLACE
+              parameters:
+                - '['
+                - ''
+            - type: STR_REPLACE
+              parameters:
+                - ']'
+                - ''
+          master_item:
+            key: raw.recorders
+          tags:
+            - tag: RECORDER
+              value: Bitrate
+          triggers:
+            - uuid: 3372dc4f6c58404b9a75581742c9319a
+              expression: 'last(/DRC200-API/recorder.bitrate.output)<>{$DRC200BITRATERECORDER}'
+              recovery_mode: RECOVERY_EXPRESSION
+              recovery_expression: 'last(/DRC200-API/recorder.bitrate.output)={$DRC200BITRATERECORDER}'
+              name: 'Recorder bitrate output is NOT 64k'
+              priority: INFO
+              description: 'Проверка на верность настройки битрейта для рекордера.'
+        - uuid: 090ba8953d8048a9862c27c735cd82e5
+          name: 'Recorder bitrate tuner'
+          type: DEPENDENT
+          key: recorder.bitrate.tuner
+          delay: '0'
+          history: 30d
+          value_type: FLOAT
+          units: b
+          preprocessing:
+            - type: JSONPATH
+              parameters:
+                - '$.data.[0].bitrate'
+            - type: STR_REPLACE
+              parameters:
+                - '['
+                - ''
+            - type: STR_REPLACE
+              parameters:
+                - ']'
+                - ''
+          master_item:
+            key: raw.recorders
+          tags:
+            - tag: RECORDER
+              value: Bitrate
+          triggers:
+            - uuid: 7e0e61301d0743558a39e6fcd27312c6
+              expression: 'last(/DRC200-API/recorder.bitrate.tuner)<>{$DRC200BITRATERECORDER}'
+              recovery_mode: RECOVERY_EXPRESSION
+              recovery_expression: 'last(/DRC200-API/recorder.bitrate.tuner)={$DRC200BITRATERECORDER}'
+              name: 'Recorder bitrate tuner is NOT 64k'
+              priority: INFO
+              description: 'Проверка на верность настройки битрейта для рекордера.'
+        - uuid: a2811df39b0a48c9b9ea8abca5567e21
+          name: 'Recorder upload status'
+          type: DEPENDENT
+          key: recorder.bitrate.upload
+          delay: '0'
+          history: 30d
+          trends: '0'
+          value_type: TEXT
+          preprocessing:
+            - type: JSONPATH
+              parameters:
+                - $.data..upload
+            - type: STR_REPLACE
+              parameters:
+                - '['
+                - ''
+            - type: STR_REPLACE
+              parameters:
+                - ']'
+                - ''
+          master_item:
+            key: raw.recorders
+          tags:
+            - tag: RECORDER
+              value: Upload
+          triggers:
+            - uuid: a3742f6407c648d6925e37ca7fcf1561
+              expression: 'last(/DRC200-API/recorder.bitrate.upload)<>{$DRC200RECUPLOADSTATUS}'
+              recovery_mode: RECOVERY_EXPRESSION
+              recovery_expression: 'last(/DRC200-API/recorder.bitrate.upload)={$DRC200RECUPLOADSTATUS}'
+              name: 'Recorder upload status is NOT normal'
+              priority: INFO
+              description: 'Проверка на корректность настройки контрольной записи и выгрузки её на сервер WebDAV'
+        - uuid: 928c46d0dfc74421b5bce68f716d90b8
+          name: 'Recorder capture point'
+          type: DEPENDENT
+          key: recorder.capturepoint
+          delay: '0'
+          history: 30d
+          trends: '0'
+          value_type: TEXT
+          preprocessing:
+            - type: JSONPATH
+              parameters:
+                - $.data..capture_point
+            - type: STR_REPLACE
+              parameters:
+                - '['
+                - ''
+            - type: STR_REPLACE
+              parameters:
+                - ']'
+                - ''
+            - type: STR_REPLACE
+              parameters:
+                - '"'
+                - ''
+            - type: STR_REPLACE
+              parameters:
+                - /static/
+                - ''
+          master_item:
+            key: raw.recorders
+          tags:
+            - tag: RECORDER
+              value: 'Capture point'
+          triggers:
+            - uuid: ca7640add5164d41a10906a473e634f9
+              expression: 'last(/DRC200-API/recorder.capturepoint)<>{$DRC200RECCAPTUREPOINT}'
+              recovery_mode: RECOVERY_EXPRESSION
+              recovery_expression: 'last(/DRC200-API/recorder.capturepoint)={$DRC200RECCAPTUREPOINT}'
+              name: 'Recorder capture point is NOT normal'
+              priority: INFO
+              description: 'Проверка на корректность настройки контрольной записи - что именно пишем.'
+        - uuid: 08d6f55e765344a6a043cebc544cbf06
+          name: 'Tuner freq'
+          type: DEPENDENT
+          key: status.tuner.freq
+          delay: '0'
+          history: 30d
+          trends: '0'
+          value_type: FLOAT
+          units: Mhz
+          preprocessing:
+            - type: JSONPATH
+              parameters:
+                - $.data..Tuner.freq
+            - type: STR_REPLACE
+              parameters:
+                - '['
+                - ''
+            - type: STR_REPLACE
+              parameters:
+                - ']'
+                - ''
+            - type: MULTIPLIER
+              parameters:
+                - '0.01'
+          master_item:
+            key: raw.system.status
+          tags:
+            - tag: status
+              value: tuner
+          triggers:
+            - uuid: 07f574d438134c2bac7250ab8956736f
+              expression: 'last(/DRC200-API/status.tuner.freq)<>{$TUNER_FREQ}'
+              name: 'Tuner settings are NOT correct in frequency'
+              status: DISABLED
+              priority: WARNING
+        - uuid: b5bc9be989514eb896f2ead19e73449a
+          name: 'Stream status'
+          type: DEPENDENT
+          key: stream.status
+          delay: '0'
+          history: 30d
+          trends: '0'
+          value_type: TEXT
+          description: 'Статус работы Интернет стрима'
+          preprocessing:
+            - type: JSONPATH
+              parameters:
+                - '$.data.lines[0].status'
+          master_item:
+            key: raw.inputs.status
+          tags:
+            - tag: STATUS
+              value: stream
+          triggers:
+            - uuid: 18d101081691454eb2d5201c84a2fc4e
+              expression: 'last(/DRC200-API/stream.status)<>"signal"'
+              recovery_mode: RECOVERY_EXPRESSION
+              recovery_expression: 'last(/DRC200-API/stream.status)="signal"'
+              name: 'Stream status is NOT active'
+              priority: WARNING
+              description: 'Проверка работы резервного источника Stream'
+        - uuid: 6c2046ddd8fa4c31bbf80247c222f6c2
+          name: 'Stream URL'
+          type: DEPENDENT
+          key: stream.url
+          delay: '0'
+          trends: '0'
+          value_type: TEXT
+          description: 'URL интернет стрима'
+          preprocessing:
+            - type: JSONPATH
+              parameters:
+                - $.data..address
+            - type: STR_REPLACE
+              parameters:
+                - '"'
+                - ''
+            - type: STR_REPLACE
+              parameters:
+                - '['
+                - ''
+            - type: STR_REPLACE
+              parameters:
+                - ']'
+                - ''
+          master_item:
+            key: raw.inputs.list
+          tags:
+            - tag: STREAM
+              value: URL
+          triggers:
+            - uuid: f1a3b619763b49039402f2968f2cc40b
+              expression: 'last(/DRC200-API/stream.url)<>{$STREAM.URL}'
+              recovery_mode: RECOVERY_EXPRESSION
+              recovery_expression: 'last(/DRC200-API/stream.url)={$STREAM.URL}'
+              name: 'Stream URL Warning'
+              priority: WARNING
+              description: 'Проверка на корректность используемого URL в Stream'
+        - uuid: 5d1e115312464af58b75d0a604c03b9a
+          name: Uptime
+          type: DEPENDENT
+          key: system.uptime
+          delay: '0'
+          history: 30d
+          trends: '0'
+          value_type: TEXT
+          description: 'DRC200 Uptime'
+          preprocessing:
+            - type: JSONPATH
+              parameters:
+                - $.data..Hardware.Uptime
+            - type: STR_REPLACE
+              parameters:
+                - '['
+                - ''
+            - type: STR_REPLACE
+              parameters:
+                - ']'
+                - ''
+            - type: STR_REPLACE
+              parameters:
+                - '"'
+                - ''
+          master_item:
+            key: raw.system.status
+          tags:
+            - tag: SYSTEM
+              value: Uptime
+        - uuid: 51e7a854016d4691a9c56ee57a204406
+          name: 'Pilot tone status'
+          type: DEPENDENT
+          key: tuner.pilot.status
+          delay: '0'
+          history: 30d
+          valuemap:
+            name: 'Pilot tone presented'
+          preprocessing:
+            - type: JSONPATH
+              parameters:
+                - $.data..Tuner.Pilot
+            - type: STR_REPLACE
+              parameters:
+                - '['
+                - ''
+            - type: STR_REPLACE
+              parameters:
+                - ']'
+                - ''
+            - type: STR_REPLACE
+              parameters:
+                - '"'
+                - ''
+          master_item:
+            key: raw.system.status
+          tags:
+            - tag: STATUS
+              value: 'Pilot tone'
+          triggers:
+            - uuid: 961efe6b60cf4cce8a504a4aac9755f2
+              expression: 'avg(/DRC200-API/tuner.pilot.status,#5)=0'
+              name: 'Pilot tone status'
+              priority: DISASTER
+              description: 'The pilot tone is MISSING!!!'
+        - uuid: f1062e0bd5c047158968e5cfce51111f
+          name: 'Tuner RSSI'
+          type: DEPENDENT
+          key: tuner.rssi
+          delay: '0'
+          history: 30d
+          value_type: FLOAT
+          units: dBm
+          description: 'Received Signal Strength Indicator'
+          preprocessing:
+            - type: JSONPATH
+              parameters:
+                - $.data..Tuner.RSSI
+            - type: STR_REPLACE
+              parameters:
+                - '['
+                - ''
+            - type: STR_REPLACE
+              parameters:
+                - ']'
+                - ''
+          master_item:
+            key: raw.system.status
+          tags:
+            - tag: component
+              value: tuner
+        - uuid: f3ae75c031b4415eb8654f31607fdc87
+          name: 'Tuner SNR'
+          type: DEPENDENT
+          key: tuner.snr
+          delay: '0'
+          history: 30d
+          value_type: FLOAT
+          description: 'Received Signal Strength Indicator'
+          preprocessing:
+            - type: JSONPATH
+              parameters:
+                - $.data..Tuner.SNR
+            - type: STR_REPLACE
+              parameters:
+                - '['
+                - ''
+            - type: STR_REPLACE
+              parameters:
+                - ']'
+                - ''
+          master_item:
+            key: raw.system.status
+          tags:
+            - tag: component
+              value: tuner
+      httptests:
+        - uuid: f69ad7778ed64bdba8736ffdad27fe36
+          name: 'Check https'
+          steps:
+            - name: 'First stap'
+              url: 'https://{HOST.IP}'
+              follow_redirects: 'NO'
+              required: 'Digiline DRC.200'
+      macros:
+        - macro: '{$CPU.UTIL.CRIT}'
+          value: '90'
+        - macro: '{$DRC200BITRATERECORDER}'
+          value: '64000'
+        - macro: '{$DRC200RECCAPTUREPOINT}'
+          value: 'output,tuner'
+        - macro: '{$DRC200RECUPLOADSTATUS}'
+          value: 'true,true'
+        - macro: '{$DRC200TOKEN}'
+        - macro: '{$LOW.LEVEL}'
+          value: '-52'
+          description: 'Значение в LUFs при котором будет производиться сработка на ТИШИНУ'
+        - macro: '{$STREAM.URL}'
+          value: ''
+          description: 'Проверка корректности STREAM URL'
+        - macro: '{$TEMP_CRIT_CPU}'
+          value: '90'
+        - macro: '{$TEMP_CRIT_LOW_CPU}'
+          value: '5'
+        - macro: '{$TEMP_WARN_CPU}'
+          value: '80'
+        - macro: '{$TUNER_FREQ}'
+      valuemaps:
+        - uuid: 107a99d056c5490bbf467208807613b6
+          name: 'Pilot tone presented'
+          mappings:
+            - value: '1'
+              newvalue: 'Is present'
+            - value: '0'
+              newvalue: 'Not Present'
+  triggers:
+    - uuid: 3886d13daa75499c8223db5e0aa56cea
+      expression: 'sum(/DRC200-API/web.test.fail[Check https],#3)=3'
+      recovery_mode: RECOVERY_EXPRESSION
+      recovery_expression: 'last(/DRC200-API/web.test.fail[Check https])=0'
+      name: 'HTTPS service on {HOST.NAME} is DOWN'
+      priority: WARNING
