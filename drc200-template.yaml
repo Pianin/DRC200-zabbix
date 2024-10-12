@@ -1,6 +1,6 @@
 zabbix_export:
   version: '6.0'
-  date: '2024-10-12T16:11:53Z'
+  date: '2024-10-12T19:11:57Z'
   groups:
     - uuid: b56506d6f54a453a90a82e58fbf49870
       name: Digiton
@@ -446,7 +446,6 @@ zabbix_export:
           key: raw.rds.settings
           history: '0'
           trends: '0'
-          status: DISABLED
           value_type: TEXT
           url: 'https://{HOST.IP}/api/'
           posts: '{"command": "get_rds_settings", "token": "{$DRC200TOKEN}"}'
@@ -497,6 +496,401 @@ zabbix_export:
           tags:
             - tag: RAW
               value: system
+        - uuid: 749a7e7a913e4e9690b76ccb41f63d9d
+          name: 'RDS AF status'
+          type: DEPENDENT
+          key: rds.af.status
+          delay: '0'
+          history: 30d
+          trends: '0'
+          value_type: TEXT
+          description: 'AF (Alternative Frequencies list) — список альтернативных частот. Это очень хорошо применимо во время поездок за пределы одного города. Когда вы покидаете зону слабого сигнала от вышки «А» и находитесь под «сильным» влиянием вышки «Б», то приёмник просто автоматически переключится на сильнейший сигнал, обнаруживаемый благодаря этой функции. Должны соблюдаться определённые условия: PI-коды совпадают, в самом RDS-кодере прописаны те самые альтернативные частоты (от 87.6 МГц до 107.9 МГц), и сигнал хоть одной из них должен стать сильнее, чем текущая частота. Список должен содержать те частоты, на которых подаётся сигнал RDS от кодера, и которые имеют достаточное пересечение по покрытию.'
+          preprocessing:
+            - type: JSONPATH
+              parameters:
+                - $.data..AF
+            - type: STR_REPLACE
+              parameters:
+                - '['
+                - ''
+            - type: STR_REPLACE
+              parameters:
+                - ']'
+                - ''
+          master_item:
+            key: raw.rds.settings
+          tags:
+            - tag: component
+              value: RDS
+            - tag: status
+              value: AF
+        - uuid: fd516eb82a474b4fb0d2d0e7ef40b4ae
+          name: 'RDS AH status'
+          type: DEPENDENT
+          key: rds.ah.status
+          delay: '0'
+          history: 30d
+          trends: '0'
+          value_type: TEXT
+          description: 'No Artificial Head/Artificial Head (числовое значение =2) — при записи программы не/используется бинауральный микрофон.'
+          preprocessing:
+            - type: JSONPATH
+              parameters:
+                - $.data..AH
+            - type: STR_REPLACE
+              parameters:
+                - '['
+                - ''
+            - type: STR_REPLACE
+              parameters:
+                - ']'
+                - ''
+          master_item:
+            key: raw.rds.settings
+          tags:
+            - tag: component
+              value: RDS
+            - tag: status
+              value: AH
+        - uuid: 4beea7dd29fb445eaa2adcc3add8274d
+          name: 'RDS Compressed status'
+          type: DEPENDENT
+          key: rds.compressed.status
+          delay: '0'
+          history: 30d
+          trends: '0'
+          value_type: TEXT
+          description: 'Not Compressed/Compressed (числовое значение =4) — программа не /компресируется. В звуке применён FM-процессинг (компрессия) либо нет.'
+          preprocessing:
+            - type: JSONPATH
+              parameters:
+                - $.data..Compressed
+            - type: STR_REPLACE
+              parameters:
+                - '['
+                - ''
+            - type: STR_REPLACE
+              parameters:
+                - ']'
+                - ''
+          master_item:
+            key: raw.rds.settings
+          tags:
+            - tag: component
+              value: RDS
+            - tag: status
+              value: compressed
+        - uuid: 8cb84c2981454e3dbc1d499d3094b527
+          name: 'RDS DynamicPTY status'
+          type: DEPENDENT
+          key: rds.dynamicpty.status
+          delay: '0'
+          history: 30d
+          trends: '0'
+          value_type: TEXT
+          description: 'Static PTY Codes/Dynamic PTY Codes (числовое значение =8) — коды PTY не/изменяются динамически.'
+          preprocessing:
+            - type: JSONPATH
+              parameters:
+                - $.data..DynamicPTY
+            - type: STR_REPLACE
+              parameters:
+                - '['
+                - ''
+            - type: STR_REPLACE
+              parameters:
+                - ']'
+                - ''
+          master_item:
+            key: raw.rds.settings
+          tags:
+            - tag: component
+              value: RDS
+            - tag: status
+              value: DynamicPTY
+        - uuid: a37a1a410b364f86ad21ff2f618201e5
+          name: 'RDS Enabled status'
+          type: DEPENDENT
+          key: rds.enabled.status
+          delay: '0'
+          history: 30d
+          trends: '0'
+          value_type: TEXT
+          description: 'Включён или нет RDS'
+          preprocessing:
+            - type: JSONPATH
+              parameters:
+                - $.data..Enable
+            - type: STR_REPLACE
+              parameters:
+                - '['
+                - ''
+            - type: STR_REPLACE
+              parameters:
+                - ']'
+                - ''
+          master_item:
+            key: raw.rds.settings
+          tags:
+            - tag: component
+              value: RDS
+            - tag: status
+              value: RDS
+        - uuid: 72d023610b0b4ca3a3814fca656c92b7
+          name: 'RDS MS status'
+          type: DEPENDENT
+          key: rds.ms.status
+          delay: '0'
+          history: 30d
+          trends: '0'
+          value_type: TEXT
+          description: 'MS (Music Speech switch) — используется для «управления» тембром звука в соответствии с тем, какую программу вы передаёте (музыкальную или разговорную).'
+          preprocessing:
+            - type: JSONPATH
+              parameters:
+                - $.data..MS
+            - type: STR_REPLACE
+              parameters:
+                - '['
+                - ''
+            - type: STR_REPLACE
+              parameters:
+                - ']'
+                - ''
+          master_item:
+            key: raw.rds.settings
+          tags:
+            - tag: component
+              value: RDS
+            - tag: status
+              value: MS
+        - uuid: 077021152c7344cfaadf66d747c4144e
+          name: 'RDS PI status'
+          type: DEPENDENT
+          key: rds.pi.status
+          delay: '0'
+          history: 30d
+          description: 'PI (Programme Identification) — это уникальный код радиостанции, состоящий из четырёх символов в 16-ричной системе. (Используются цифры от 0 до 9, и буквы от A до F'
+          preprocessing:
+            - type: JSONPATH
+              parameters:
+                - $.data..PI
+            - type: STR_REPLACE
+              parameters:
+                - '['
+                - ''
+            - type: STR_REPLACE
+              parameters:
+                - ']'
+                - ''
+          master_item:
+            key: raw.rds.settings
+          tags:
+            - tag: component
+              value: RDS
+            - tag: status
+              value: PI
+        - uuid: f97d77a4f24e4d0bbac696ea6f55be3d
+          name: 'RDS PS status'
+          type: DEPENDENT
+          key: rds.ps.status
+          delay: '0'
+          history: 30d
+          trends: '0'
+          value_type: TEXT
+          description: 'PS (Programme Service name) — эта строчка предназначена СТРОГО для написания сокращённого названия радиостанции и ничего более. Национальным (и европейским) стандартом описано, что функция PS должна быть статическая и не использоваться для передачи текста! Рассчитана эта строчка только на 8 символов'
+          preprocessing:
+            - type: JSONPATH
+              parameters:
+                - $.data..PS
+            - type: STR_REPLACE
+              parameters:
+                - '['
+                - ''
+            - type: STR_REPLACE
+              parameters:
+                - ']'
+                - ''
+          master_item:
+            key: raw.rds.settings
+          tags:
+            - tag: component
+              value: RDS
+            - tag: status
+              value: PS
+        - uuid: 66272e5d4d21451b97dd03c8372397ee
+          name: 'RDS PTY status'
+          type: DEPENDENT
+          key: rds.pty.status
+          delay: '0'
+          history: 30d
+          description: 'PTY (Programme TYpe) — задаётся жанр вашей радиостанции. Из 30 вариантов выбирайте тот, что ближе всего отражает формат вашей станции. Вам достаточно ввести число, которое по умолчанию отображает формат. Только не перепутайте: в Европе и Америке (RDS/RBDS) числа PTY подразумевает разные форматы: 4 — в Европе обозначает Sports, а в Америке — Talk; 5— Education (Rock); 22 — Travel (Public).'
+          valuemap:
+            name: 'PTY Mapping'
+          preprocessing:
+            - type: JSONPATH
+              parameters:
+                - $.data..PTY
+            - type: STR_REPLACE
+              parameters:
+                - '['
+                - ''
+            - type: STR_REPLACE
+              parameters:
+                - ']'
+                - ''
+          master_item:
+            key: raw.rds.settings
+          tags:
+            - tag: component
+              value: RDS
+            - tag: status
+              value: PTY
+        - uuid: 50994d2865b6470689edb99bd38690a8
+          name: 'RDS RT status'
+          type: DEPENDENT
+          key: rds.rt.status
+          delay: '0'
+          history: 30d
+          trends: '0'
+          value_type: TEXT
+          description: |
+            RT (RadioText) — вот именно в это поле нужно передавать всё то, что вы хотите донести до слушателя: название песни, адрес сайта, слоган, всё, что вашей душе угодно, и что уместится в 64 символа.
+            
+            RT может передаваться в одной и групп: 2А или 2В. Отличие в том, что в группе 2А мы можем использовать до 64 символов, в 2В — только 32. Не рекомендуется так же перед именем композиции писать название радиостанции или «V efire:». Длинное сообщение RT не сможет влезть целиком, если есть лишний балласт вначале.
+          preprocessing:
+            - type: JSONPATH
+              parameters:
+                - $.data..RT
+            - type: STR_REPLACE
+              parameters:
+                - '['
+                - ''
+            - type: STR_REPLACE
+              parameters:
+                - ']'
+                - ''
+          master_item:
+            key: raw.rds.settings
+          tags:
+            - tag: component
+              value: RDS
+            - tag: status
+              value: RT
+        - uuid: cc334359d67847459a4e1d45741e229c
+          name: 'RDS RTC status'
+          type: DEPENDENT
+          key: rds.rtc.status
+          delay: '0'
+          history: 30d
+          trends: '0'
+          value_type: TEXT
+          description: |
+            Предполагаю!!!
+            CT (Clock Time and date) — передача информации о дате и точном времени. Служит для отображения на дисплее приёмника, а так же для синхронизации ваших автомобильных часов (если это предусмотрено). Передавать в эфир мы должны всемирное координированное время UTC, и отдельно выставлять часовой пояс со смещением UTC+3. До недавнего времени в Минске были несколько радиостанций, которые передавали ложное время. Разница достигала от 5 минут до 2 часов. Согласитесь, это «медвежья» услуга в таком виде. Поэтому время должно быть точным и желательно иметь регулярную возможность синхронизироваться в кодере через тайм-сервер в вашей сети или в интернете.
+          preprocessing:
+            - type: JSONPATH
+              parameters:
+                - $.data..RTC
+            - type: STR_REPLACE
+              parameters:
+                - '['
+                - ''
+            - type: STR_REPLACE
+              parameters:
+                - ']'
+                - ''
+          master_item:
+            key: raw.rds.settings
+          tags:
+            - tag: component
+              value: RDS
+            - tag: status
+              value: RTС
+        - uuid: fa0c6c6c999d4352bd4bd19b418f691a
+          name: 'RDS Stereo status'
+          type: DEPENDENT
+          key: rds.stereo.status
+          delay: '0'
+          history: 30d
+          trends: '0'
+          value_type: TEXT
+          description: 'Mono/Stereo (числовое значение =1) — программа в моно/стерео режиме.'
+          preprocessing:
+            - type: JSONPATH
+              parameters:
+                - $.data..RStereo
+            - type: STR_REPLACE
+              parameters:
+                - '['
+                - ''
+            - type: STR_REPLACE
+              parameters:
+                - ']'
+                - ''
+          master_item:
+            key: raw.rds.settings
+          tags:
+            - tag: component
+              value: RDS
+            - tag: status
+              value: Stereo
+        - uuid: 7416a6d8525348c999d82820612421ca
+          name: 'RDS TA status'
+          type: DEPENDENT
+          key: rds.ta.status
+          delay: '0'
+          history: 30d
+          trends: '0'
+          value_type: TEXT
+          description: 'TP/TA (Traffic Programme identification/Traffic Announcement identification) — эти два тега созданы для комфортной «работы» слушателя с дорожной информацией за рулём автомобиля. При активации данных режимов, происходит переключение с кассет, CD-дисков на станцию передающую дорожную обстановку. После прекращения передачи дорожной сводки происходит возврат к ранее прослушиваемой кассете или CD-диску. Стоит отметить что в машинах имеется ручная регулировка громкости при передачи дорожной информации.'
+          preprocessing:
+            - type: JSONPATH
+              parameters:
+                - $.data..TA
+            - type: STR_REPLACE
+              parameters:
+                - '['
+                - ''
+            - type: STR_REPLACE
+              parameters:
+                - ']'
+                - ''
+          master_item:
+            key: raw.rds.settings
+          tags:
+            - tag: component
+              value: RDS
+            - tag: status
+              value: TA
+        - uuid: ac0019cc07fb4116b359ddf838a5138b
+          name: 'RDS TP status'
+          type: DEPENDENT
+          key: rds.tp.status
+          delay: '0'
+          history: 30d
+          trends: '0'
+          value_type: TEXT
+          description: 'TP/TA (Traffic Programme identification/Traffic Announcement identification) — эти два тега созданы для комфортной «работы» слушателя с дорожной информацией за рулём автомобиля. При активации данных режимов, происходит переключение с кассет, CD-дисков на станцию передающую дорожную обстановку. После прекращения передачи дорожной сводки происходит возврат к ранее прослушиваемой кассете или CD-диску. Стоит отметить что в машинах имеется ручная регулировка громкости при передачи дорожной информации.'
+          preprocessing:
+            - type: JSONPATH
+              parameters:
+                - $.data..TP
+            - type: STR_REPLACE
+              parameters:
+                - '['
+                - ''
+            - type: STR_REPLACE
+              parameters:
+                - ']'
+                - ''
+          master_item:
+            key: raw.rds.settings
+          tags:
+            - tag: component
+              value: RDS
+            - tag: status
+              value: TP
         - uuid: 3e32116c544945059d6652c8d7965ced
           name: 'Recorder bitrate output'
           type: DEPENDENT
@@ -890,6 +1284,73 @@ zabbix_export:
               newvalue: 'Is present'
             - value: '0'
               newvalue: 'Not Present'
+        - uuid: 33436aefe4e04c8ba6a74442592a6e60
+          name: 'PTY Mapping'
+          mappings:
+            - value: '0'
+              newvalue: 'The program type is not defined'
+            - value: '1'
+              newvalue: News
+            - value: '2'
+              newvalue: 'Current Affairs'
+            - value: '3'
+              newvalue: Information
+            - value: '4'
+              newvalue: Sport
+            - value: '5'
+              newvalue: Education
+            - value: '6'
+              newvalue: Drama
+            - value: '7'
+              newvalue: Culture
+            - value: '8'
+              newvalue: Science
+            - value: '9'
+              newvalue: Varied
+            - value: '10'
+              newvalue: 'Pop Music'
+            - value: '11'
+              newvalue: 'Rock Music'
+            - value: '12'
+              newvalue: 'Easi Listening'
+            - value: '13'
+              newvalue: 'Light Classical'
+            - value: '14'
+              newvalue: 'Serious Classical'
+            - value: '15'
+              newvalue: 'Other music'
+            - value: '16'
+              newvalue: Weather
+            - value: '17'
+              newvalue: Finance
+            - value: '18'
+              newvalue: 'Children`s Programs'
+            - value: '19'
+              newvalue: 'Social Affairs'
+            - value: '20'
+              newvalue: Religion
+            - value: '21'
+              newvalue: 'Phone In'
+            - value: '22'
+              newvalue: Travel
+            - value: '23'
+              newvalue: Leisure
+            - value: '24'
+              newvalue: 'Jazz Music'
+            - value: '25'
+              newvalue: 'Country music'
+            - value: '26'
+              newvalue: 'National Music'
+            - value: '27'
+              newvalue: 'Oldies Music'
+            - value: '28'
+              newvalue: 'Folk Music'
+            - value: '29'
+              newvalue: Documentary
+            - value: '30'
+              newvalue: 'ALARM TEST'
+            - value: '31'
+              newvalue: ALARM
   triggers:
     - uuid: 3886d13daa75499c8223db5e0aa56cea
       expression: 'sum(/DRC200-API/web.test.fail[Check https],#3)=3'
