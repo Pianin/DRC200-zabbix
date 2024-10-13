@@ -1,6 +1,6 @@
 zabbix_export:
   version: '6.0'
-  date: '2024-10-12T19:20:48Z'
+  date: '2024-10-13T16:34:24Z'
   groups:
     - uuid: b56506d6f54a453a90a82e58fbf49870
       name: Digiton
@@ -271,6 +271,100 @@ zabbix_export:
               recovery_expression: 'last(/DRC200-API/mp3.status)="signal"'
               name: 'MP3 status is NOT active'
               priority: INFO
+        - uuid: 75a00fb409e5445a90c16475b27f03c6
+          name: 'NTP Enabled status'
+          type: DEPENDENT
+          key: ntp.enabled.status
+          delay: '0'
+          history: 30d
+          description: 'Состояние сервиса NTP'
+          valuemap:
+            name: 'NTP Status'
+          preprocessing:
+            - type: JSONPATH
+              parameters:
+                - $.data..network_time
+            - type: STR_REPLACE
+              parameters:
+                - '['
+                - ''
+            - type: STR_REPLACE
+              parameters:
+                - ']'
+                - ''
+            - type: STR_REPLACE
+              parameters:
+                - 'false'
+                - '0'
+            - type: STR_REPLACE
+              parameters:
+                - 'true'
+                - '1'
+          master_item:
+            key: raw.ntp.status
+          tags:
+            - tag: component
+              value: NTP
+            - tag: status
+              value: Enabled
+        - uuid: 2065e4642f9643daa3dc5767ed1ccd57
+          name: 'NTP Server settings'
+          type: DEPENDENT
+          key: ntp.ntpserver
+          delay: '0'
+          history: 30d
+          trends: '0'
+          value_type: LOG
+          description: 'Состояние сервиса NTP'
+          preprocessing:
+            - type: JSONPATH
+              parameters:
+                - $.data..ntp_server
+            - type: STR_REPLACE
+              parameters:
+                - '['
+                - ''
+            - type: STR_REPLACE
+              parameters:
+                - ']'
+                - ''
+            - type: STR_REPLACE
+              parameters:
+                - '"'
+                - ''
+          master_item:
+            key: raw.ntp.status
+          tags:
+            - tag: component
+              value: NTP
+            - tag: status
+              value: Enabled
+        - uuid: 19f1c314e61441d68e35671f3e97adca
+          name: 'NTP TimeZone'
+          type: DEPENDENT
+          key: ntp.timezone.status
+          delay: '0'
+          history: 30d
+          description: 'Настройка на DRC200 TimeZone'
+          preprocessing:
+            - type: JSONPATH
+              parameters:
+                - $.data..timezone
+            - type: STR_REPLACE
+              parameters:
+                - '['
+                - ''
+            - type: STR_REPLACE
+              parameters:
+                - ']'
+                - ''
+          master_item:
+            key: raw.ntp.status
+          tags:
+            - tag: component
+              value: NTP
+            - tag: status
+              value: Timezone
         - uuid: efe9e339b3f94ad49f2f8930e91f0b65
           name: 'Playlist active'
           type: DEPENDENT
@@ -371,7 +465,6 @@ zabbix_export:
           key: raw.info
           history: '0'
           trends: '0'
-          status: DISABLED
           value_type: TEXT
           url: 'https://{HOST.IP}/api/'
           posts: '{"command": "get_info", "token": "{$DRC200TOKEN}"}'
@@ -421,6 +514,36 @@ zabbix_export:
           request_method: POST
           tags:
             - tag: RAW
+        - uuid: 9d0b0a8ecc7044a8b4a9290199582d5c
+          name: 'Raw Get NTP status'
+          type: HTTP_AGENT
+          key: raw.ntp.status
+          delay: 30m
+          history: '0'
+          trends: '0'
+          value_type: TEXT
+          preprocessing:
+            - type: JAVASCRIPT
+              parameters:
+                - 'return value.replace (/\\n/gi, ''\n'')'
+            - type: JAVASCRIPT
+              parameters:
+                - 'return value.replace (/\\/gi, '''')'
+            - type: STR_REPLACE
+              parameters:
+                - '"{'
+                - '{'
+            - type: STR_REPLACE
+              parameters:
+                - '}"'
+                - '}'
+          url: 'https://{HOST.IP}/api/'
+          posts: '{"command": "get_time", "token": "{$DRC200TOKEN}"}'
+          post_type: JSON
+          request_method: POST
+          tags:
+            - tag: RAW
+              value: NTP
         - uuid: f1e27a3627944503a9293fda303c2eba
           name: 'Raw Get Playlist status'
           type: HTTP_AGENT
@@ -467,6 +590,7 @@ zabbix_export:
           request_method: POST
           tags:
             - tag: RAW
+              value: Recorder
         - uuid: 61766083b47543ee9edd85f8acb95907
           name: 'Raw Get System status'
           type: HTTP_AGENT
@@ -530,9 +654,9 @@ zabbix_export:
           key: rds.ah.status
           delay: '0'
           history: 30d
-          trends: '0'
-          value_type: TEXT
           description: 'No Artificial Head/Artificial Head (числовое значение =2) — при записи программы не/используется бинауральный микрофон.'
+          valuemap:
+            name: 'RDS Status'
           preprocessing:
             - type: JSONPATH
               parameters:
@@ -545,6 +669,14 @@ zabbix_export:
               parameters:
                 - ']'
                 - ''
+            - type: STR_REPLACE
+              parameters:
+                - 'false'
+                - '0'
+            - type: STR_REPLACE
+              parameters:
+                - 'true'
+                - '1'
           master_item:
             key: raw.rds.settings
           tags:
@@ -558,9 +690,9 @@ zabbix_export:
           key: rds.compressed.status
           delay: '0'
           history: 30d
-          trends: '0'
-          value_type: TEXT
           description: 'Not Compressed/Compressed (числовое значение =4) — программа не /компресируется. В звуке применён FM-процессинг (компрессия) либо нет.'
+          valuemap:
+            name: 'RDS Status'
           preprocessing:
             - type: JSONPATH
               parameters:
@@ -573,6 +705,14 @@ zabbix_export:
               parameters:
                 - ']'
                 - ''
+            - type: STR_REPLACE
+              parameters:
+                - 'false'
+                - '0'
+            - type: STR_REPLACE
+              parameters:
+                - 'true'
+                - '1'
           master_item:
             key: raw.rds.settings
           tags:
@@ -586,9 +726,9 @@ zabbix_export:
           key: rds.dynamicpty.status
           delay: '0'
           history: 30d
-          trends: '0'
-          value_type: TEXT
           description: 'Static PTY Codes/Dynamic PTY Codes (числовое значение =8) — коды PTY не/изменяются динамически.'
+          valuemap:
+            name: 'RDS Status'
           preprocessing:
             - type: JSONPATH
               parameters:
@@ -601,6 +741,14 @@ zabbix_export:
               parameters:
                 - ']'
                 - ''
+            - type: STR_REPLACE
+              parameters:
+                - 'false'
+                - '0'
+            - type: STR_REPLACE
+              parameters:
+                - 'true'
+                - '1'
           master_item:
             key: raw.rds.settings
           tags:
@@ -614,9 +762,9 @@ zabbix_export:
           key: rds.enabled.status
           delay: '0'
           history: 30d
-          trends: '0'
-          value_type: TEXT
           description: 'Включён или нет RDS'
+          valuemap:
+            name: 'RDS Status'
           preprocessing:
             - type: JSONPATH
               parameters:
@@ -629,6 +777,14 @@ zabbix_export:
               parameters:
                 - ']'
                 - ''
+            - type: STR_REPLACE
+              parameters:
+                - 'false'
+                - '0'
+            - type: STR_REPLACE
+              parameters:
+                - 'true'
+                - '1'
           master_item:
             key: raw.rds.settings
           tags:
@@ -642,9 +798,10 @@ zabbix_export:
           key: rds.ms.status
           delay: '0'
           history: 30d
-          trends: '0'
-          value_type: TEXT
+          value_type: FLOAT
           description: 'MS (Music Speech switch) — используется для «управления» тембром звука в соответствии с тем, какую программу вы передаёте (музыкальную или разговорную).'
+          valuemap:
+            name: 'RDS Status'
           preprocessing:
             - type: JSONPATH
               parameters:
@@ -657,6 +814,14 @@ zabbix_export:
               parameters:
                 - ']'
                 - ''
+            - type: STR_REPLACE
+              parameters:
+                - 'false'
+                - '0'
+            - type: STR_REPLACE
+              parameters:
+                - 'true'
+                - '1'
           master_item:
             key: raw.rds.settings
           tags:
@@ -783,9 +948,9 @@ zabbix_export:
           key: rds.rtc.status
           delay: '0'
           history: 30d
-          trends: '0'
-          value_type: TEXT
           description: 'CT (Clock Time and date) — передача информации о дате и точном времени. Служит для отображения на дисплее приёмника, а так же для синхронизации ваших автомобильных часов (если это предусмотрено). Передавать в эфир мы должны всемирное координированное время UTC, и отдельно выставлять часовой пояс со смещением UTC+3.'
+          valuemap:
+            name: 'RDS Status'
           preprocessing:
             - type: JSONPATH
               parameters:
@@ -798,6 +963,14 @@ zabbix_export:
               parameters:
                 - ']'
                 - ''
+            - type: STR_REPLACE
+              parameters:
+                - 'false'
+                - '0'
+            - type: STR_REPLACE
+              parameters:
+                - 'true'
+                - '1'
           master_item:
             key: raw.rds.settings
           tags:
@@ -811,9 +984,9 @@ zabbix_export:
           key: rds.stereo.status
           delay: '0'
           history: 30d
-          trends: '0'
-          value_type: TEXT
           description: 'Mono/Stereo (числовое значение =1) — программа в моно/стерео режиме.'
+          valuemap:
+            name: 'RDS Status'
           preprocessing:
             - type: JSONPATH
               parameters:
@@ -826,6 +999,14 @@ zabbix_export:
               parameters:
                 - ']'
                 - ''
+            - type: STR_REPLACE
+              parameters:
+                - 'false'
+                - '0'
+            - type: STR_REPLACE
+              parameters:
+                - 'true'
+                - '1'
           master_item:
             key: raw.rds.settings
           tags:
@@ -839,9 +1020,9 @@ zabbix_export:
           key: rds.ta.status
           delay: '0'
           history: 30d
-          trends: '0'
-          value_type: TEXT
           description: 'TP/TA (Traffic Programme identification/Traffic Announcement identification) — эти два тега созданы для комфортной «работы» слушателя с дорожной информацией за рулём автомобиля. При активации данных режимов, происходит переключение с кассет, CD-дисков на станцию передающую дорожную обстановку. После прекращения передачи дорожной сводки происходит возврат к ранее прослушиваемой кассете или CD-диску. Стоит отметить что в машинах имеется ручная регулировка громкости при передачи дорожной информации.'
+          valuemap:
+            name: 'RDS Status'
           preprocessing:
             - type: JSONPATH
               parameters:
@@ -854,6 +1035,14 @@ zabbix_export:
               parameters:
                 - ']'
                 - ''
+            - type: STR_REPLACE
+              parameters:
+                - 'false'
+                - '0'
+            - type: STR_REPLACE
+              parameters:
+                - 'true'
+                - '1'
           master_item:
             key: raw.rds.settings
           tags:
@@ -867,9 +1056,9 @@ zabbix_export:
           key: rds.tp.status
           delay: '0'
           history: 30d
-          trends: '0'
-          value_type: TEXT
           description: 'TP/TA (Traffic Programme identification/Traffic Announcement identification) — эти два тега созданы для комфортной «работы» слушателя с дорожной информацией за рулём автомобиля. При активации данных режимов, происходит переключение с кассет, CD-дисков на станцию передающую дорожную обстановку. После прекращения передачи дорожной сводки происходит возврат к ранее прослушиваемой кассете или CD-диску. Стоит отметить что в машинах имеется ручная регулировка громкости при передачи дорожной информации.'
+          valuemap:
+            name: 'RDS Status'
           preprocessing:
             - type: JSONPATH
               parameters:
@@ -882,6 +1071,14 @@ zabbix_export:
               parameters:
                 - ']'
                 - ''
+            - type: STR_REPLACE
+              parameters:
+                - 'false'
+                - '0'
+            - type: STR_REPLACE
+              parameters:
+                - 'true'
+                - '1'
           master_item:
             key: raw.rds.settings
           tags:
@@ -1127,6 +1324,51 @@ zabbix_export:
               name: 'Stream URL Warning'
               priority: WARNING
               description: 'Проверка на корректность используемого URL в Stream'
+        - uuid: 04a27d55e4dd46f8be87e0ffc49f67c2
+          name: 'NTP UTC Time'
+          type: DEPENDENT
+          key: system.localtime
+          delay: '0'
+          history: 30d
+          units: unixtime
+          description: 'Текущее время в UTC'
+          preprocessing:
+            - type: JSONPATH
+              parameters:
+                - $.data..utc_time
+            - type: STR_REPLACE
+              parameters:
+                - '['
+                - ''
+            - type: STR_REPLACE
+              parameters:
+                - ']'
+                - ''
+            - type: STR_REPLACE
+              parameters:
+                - '"'
+                - ''
+            - type: JAVASCRIPT
+              parameters:
+                - |
+                  const date = new Date(value);
+                  const timestampSeconds = Math.floor(date.getTime() / 1000);
+                  return(timestampSeconds)
+          master_item:
+            key: raw.ntp.status
+          tags:
+            - tag: component
+              value: NTP
+            - tag: status
+              value: 'UTC Time'
+          triggers:
+            - uuid: 8e42dea14909456ab6d4c7887a13604f
+              expression: 'fuzzytime(/DRC200-API/system.localtime,{$SYSTEM.FUZZYTIME.MAX})=0'
+              name: 'System time is out of sync'
+              event_name: 'System time is out of sync (diff with Zabbix server > {$SYSTEM.FUZZYTIME.MAX}s)'
+              priority: WARNING
+              description: 'The host system time is different from the Zabbix server time.'
+              manual_close: 'YES'
         - uuid: 5d1e115312464af58b75d0a604c03b9a
           name: Uptime
           type: DEPENDENT
@@ -1267,6 +1509,9 @@ zabbix_export:
         - macro: '{$STREAM.URL}'
           value: 'http://radiovera.hostingradio.ru:8007/radiovera_128'
           description: 'Проверка корректности STREAM URL'
+        - macro: '{$SYSTEM.FUZZYTIME.MAX}'
+          value: '60'
+          description: 'The threshold for difference of system time in seconds.'
         - macro: '{$TEMP_CRIT_CPU}'
           value: '90'
         - macro: '{$TEMP_CRIT_LOW_CPU}'
@@ -1275,6 +1520,13 @@ zabbix_export:
           value: '80'
         - macro: '{$TUNER_FREQ}'
       valuemaps:
+        - uuid: 71b7f0d21c9e4bd79416a3d8f42384e8
+          name: 'NTP Status'
+          mappings:
+            - value: '0'
+              newvalue: 'false'
+            - value: '1'
+              newvalue: 'true'
         - uuid: 107a99d056c5490bbf467208807613b6
           name: 'Pilot tone presented'
           mappings:
@@ -1349,6 +1601,13 @@ zabbix_export:
               newvalue: 'ALARM TEST'
             - value: '31'
               newvalue: ALARM
+        - uuid: a9cd3829d15448aab005e52b86bccb05
+          name: 'RDS Status'
+          mappings:
+            - value: '0'
+              newvalue: 'false'
+            - value: '1'
+              newvalue: 'true'
   triggers:
     - uuid: 3886d13daa75499c8223db5e0aa56cea
       expression: 'sum(/DRC200-API/web.test.fail[Check https],#3)=3'
