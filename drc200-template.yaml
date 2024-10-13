@@ -1507,7 +1507,7 @@ zabbix_export:
           value: '-52'
           description: 'Значение в LUFs при котором будет производиться сработка на ТИШИНУ'
         - macro: '{$STREAM.URL}'
-          value: 'http://radiovera.hostingradio.ru:8007/radiovera_128'
+          value: ''
           description: 'Проверка корректности STREAM URL'
         - macro: '{$SYSTEM.FUZZYTIME.MAX}'
           value: '60'
