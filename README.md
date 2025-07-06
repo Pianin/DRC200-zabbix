@@ -29,4 +29,4 @@ Testing was performed on firmware 1.17 to 1.19
 |{$TEMP_CRIT_CPU}|<p>Critical CPU temperature in Celsius in case of overheating</p>|`95`|
 |{$TEMP_CRIT_LOW_CPU}|<p>Critical CPU temperature in Celsius at low values</p>|`5`|
 |{$TEMP_WARN_CPU}|<p>Critical CPU temperature in Celsius  in case of overheating but only WARN</p>|`85`|
-|{$TUNER_FREQ}|<p>Checking the correctness of the tuner and MPX settings used</p>|`0`|
+|{$TUNER_FREQ}|<p>Checking the correctness of the tuner and MPX settings used</p>|``|
