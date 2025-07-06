@@ -20,8 +20,8 @@ Testing was performed on firmware 1.17 to 1.19
 |----|-----------|-------|
 |{$CPU.UTIL.CRIT}|<p>Critical CLU load in %</p>|`90`|
 |{$DRC200BITRATERECORDER}|<p>Setting the verifiable bitrate characteristics for the control recording</p>|`64000`|
-|{{$DRC200RECCAPTUREPOINT}|<p>Setting the verifiable characteristics of the control entry pointss</p>|`output,tuner`|
-|{{$DRC200RECUPLOADSTATUS}|<p>We set the verifiable characteristics of the control recording points and their upload to external storage</p>|`true,true`|
+|{$DRC200RECCAPTUREPOINT}|<p>Setting the verifiable characteristics of the control entry pointss</p>|`output,tuner`|
+|{$DRC200RECUPLOADSTATUS}|<p>We set the verifiable characteristics of the control recording points and their upload to external storage</p>|`true,true`|
 |{$DRC200TOKEN}|<p>A token for authorization on the device for polling it</p>|``|
 |{$LOW.LEVEL}|<p>The value in LUFS that will be triggered for silence</p>|`-52`|
 |{$STREAM.URL}|<p>We check the correctness of the URL used for the streaming stream</p>|``|
